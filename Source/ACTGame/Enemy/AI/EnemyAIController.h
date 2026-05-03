@@ -32,9 +32,6 @@ public:
 	float PostStunResumeDelay = 1.5f;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|AI")
-	TObjectPtr<UAIPerceptionComponent> PerceptionComponent = nullptr;
-
 	UPROPERTY()
 	TObjectPtr<UAISenseConfig_Sight> SightConfig = nullptr;
 
