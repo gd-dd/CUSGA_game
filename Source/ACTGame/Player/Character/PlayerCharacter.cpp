@@ -52,7 +52,7 @@ APlayerCharacter::APlayerCharacter()
 
 	// 武器静态网格体子对象（默认挂在角色骨骼网格体下）
 	Weapon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon"));
-	Weapon->SetupAttachment(GetMesh(), FName("Anbi_Weapon_02Socket"));
+	Weapon->SetupAttachment(GetMesh(), FName("Character_Weapon_02Socket"));
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
