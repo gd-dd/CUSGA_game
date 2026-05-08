@@ -4,6 +4,7 @@
 #include "Camera/CameraComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Components/StaticMeshComponent.h"
+#include "Player/Health/PlayerHealth.h"
 #include "Player/StateMachine/PlayerStateMachine.h"
 #include "Player/StateMachine/States/Locomotion/PlayerIdleState.h"
 #include "Player/Weapon/WeaponCollider.h"
@@ -45,6 +46,9 @@ APlayerCharacter::APlayerCharacter()
 
 	// 初始化武器碰撞组件
 	WeaponCollider = CreateDefaultSubobject<UWeaponCollider>(TEXT("WeaponCollider"));
+
+	// 初始化生命值组件
+	PlayerHealth = CreateDefaultSubobject<UPlayerHealth>(TEXT("PlayerHealth"));
 
 	// 武器静态网格体子对象（默认挂在角色骨骼网格体下）
 	Weapon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon"));

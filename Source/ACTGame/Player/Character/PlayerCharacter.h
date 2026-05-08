@@ -11,6 +11,7 @@ class UAnimMontage;
 class UActionDataContainer;
 class UWeaponCollider;
 class UStaticMeshComponent;
+class UPlayerHealth;
 
 /**
  * 玩家实际操控的角色实体类 (PlayerCharacter)
@@ -49,6 +50,9 @@ public:
 	// 获取角色绑定的动作数据容器
 	UActionDataContainer* GetActionDataContainer() const { return ActionDataContainer; }
 
+	// 获取生命值组件
+	UPlayerHealth* GetPlayerHealth() const { return PlayerHealth; }
+
 protected:
 	// 摄像机摇臂
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
@@ -73,6 +77,10 @@ protected:
 	// 武器碰撞组件（命中检测与事件分发）
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat|Collision", meta = (AllowPrivateAccess = "true"))
 	UWeaponCollider* WeaponCollider;
+
+	// 玩家生命值组件
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Health", meta = (AllowPrivateAccess = "true"))
+	UPlayerHealth* PlayerHealth;
 
 	// 武器静态网格体组件（挂在角色骨骼网格体下，蓝图中可直接设置网格资源）
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat|Weapon", meta = (AllowPrivateAccess = "true"))

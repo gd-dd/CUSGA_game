@@ -76,3 +76,6 @@ DerivedDataCache/*
 
 Content/Assets/MA/1.uasset
 Content/Assets/MA/5.uasset
+
+# Trae IDE directory
+.trae/
