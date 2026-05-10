@@ -3,6 +3,7 @@
 #include "GameFramework/Pawn.h"
 #include "Player/Character/PlayerCharacter.h"
 #include "ACTPlayerState.h"
+#include "Player/UI/UIManager.h"
 
 AACTGameMode::AACTGameMode()
 {
@@ -14,4 +15,7 @@ AACTGameMode::AACTGameMode()
 
 	// 设置默认的 PlayerState 类
 	PlayerStateClass = AACTPlayerState::StaticClass();
+
+	// 设置默认 HUD 为 UIManager
+	HUDClass = AUIManager::StaticClass();
 }
