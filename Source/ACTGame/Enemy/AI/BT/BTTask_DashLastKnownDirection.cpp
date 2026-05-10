@@ -10,7 +10,9 @@ namespace
 {
 	struct FDashTaskMemory
 	{
+		// 冲刺结束时间（世界时间秒）
 		float EndTime = 0.0f;
+		// ExecuteTask 成功启动后置 true，用于 TickTask 安全检查
 		bool bStarted = false;
 	};
 }
@@ -48,16 +50,20 @@ EBTNodeResult::Type UBTTask_DashLastKnownDirection::ExecuteTask(UBehaviorTreeCom
 	FVector Dir = (LastKnownLocation - SelfChar->GetActorLocation()).GetSafeNormal2D();
 	if (Dir.IsNearlyZero())
 	{
+		// 兜底：位置重合时沿当前朝向冲刺
 		Dir = SelfChar->GetActorForwardVector().GetSafeNormal2D();
 	}
 
+	// 冲刺前先对齐朝向，让后续扇形攻击/动画更自然
 	SelfChar->SetActorRotation(Dir.Rotation());
 
+	// 通知敌人执行冲刺表现（蓝图覆写）
 	if (AEnemyBaseCharacter* Enemy = Cast<AEnemyBaseCharacter>(SelfChar))
 	{
 		Enemy->DoDash();
 	}
 
+	// 用 LaunchCharacter 推进（无需导航）
 	SelfChar->LaunchCharacter(Dir * DashSpeed, true, true);
 
 	const float Now = SelfChar->GetWorld() ? SelfChar->GetWorld()->GetTimeSeconds() : 0.0f;
@@ -83,6 +89,7 @@ void UBTTask_DashLastKnownDirection::TickTask(UBehaviorTreeComponent& OwnerComp,
 		return;
 	}
 
+	// 冲刺时间到：强制停止，避免继续滑行
 	if (UCharacterMovementComponent* MoveComp = SelfChar->GetCharacterMovement())
 	{
 		MoveComp->StopMovementImmediately();

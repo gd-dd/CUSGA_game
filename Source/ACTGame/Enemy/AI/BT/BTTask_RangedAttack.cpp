@@ -22,16 +22,19 @@ EBTNodeResult::Type UBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& Ow
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
 	AActor* TargetActor = BB ? Cast<AActor>(BB->GetValueAsObject(TargetActorKey.SelectedKeyName)) : nullptr;
 
+	// 先触发敌人侧的远程攻击入口（通常由蓝图覆写实现播放动画/生成投射物等）
 	if (AEnemyBaseCharacter* Enemy = Cast<AEnemyBaseCharacter>(SelfPawn))
 	{
 		Enemy->DoRangedAttack();
 	}
 
+	// 非即时命中：只负责触发攻击表现，伤害交由投射物/动画通知等处理
 	if (!bInstantHit || !TargetActor)
 	{
 		return EBTNodeResult::Succeeded;
 	}
 
+	// 即时命中：距离满足时直接对目标扣血（用于原型或无投射物实现的情况）
 	const float Dist = FVector::Dist(SelfPawn->GetActorLocation(), TargetActor->GetActorLocation());
 	if (Dist > MaxRange)
 	{

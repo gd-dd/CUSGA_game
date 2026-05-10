@@ -22,16 +22,19 @@ EBTNodeResult::Type UBTTask_MeleeConeAttack::ExecuteTask(UBehaviorTreeComponent&
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
 	AActor* TargetActor = BB ? Cast<AActor>(BB->GetValueAsObject(TargetActorKey.SelectedKeyName)) : nullptr;
 
+	// 先触发敌人侧的近战攻击入口（通常由蓝图覆写实现播放蒙太奇/特效等）
 	if (AEnemyBaseCharacter* Enemy = Cast<AEnemyBaseCharacter>(SelfPawn))
 	{
 		Enemy->DoMeleeAttack();
 	}
 
+	// 没有目标也算成功结束（避免卡死行为树）
 	if (!TargetActor)
 	{
 		return EBTNodeResult::Succeeded;
 	}
 
+	// 1) 距离判定
 	const FVector ToTarget = TargetActor->GetActorLocation() - SelfPawn->GetActorLocation();
 	const float Dist = ToTarget.Size();
 	if (Dist > ConeRange)
@@ -39,6 +42,7 @@ EBTNodeResult::Type UBTTask_MeleeConeAttack::ExecuteTask(UBehaviorTreeComponent&
 		return EBTNodeResult::Succeeded;
 	}
 
+	// 2) 扇形夹角判定（仅用水平面 2D 方向）
 	const FVector Forward2D = SelfPawn->GetActorForwardVector().GetSafeNormal2D();
 	const FVector ToTarget2D = ToTarget.GetSafeNormal2D();
 	const float CosHalfAngle = FMath::Cos(FMath::DegreesToRadians(ConeAngleDegrees * 0.5f));
