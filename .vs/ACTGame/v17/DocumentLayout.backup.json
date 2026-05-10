@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "G:\\cusga\\CUSGA_game\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\cusga\\CUSGA_game\\Source\\ACTGame\\Enemy\\EnemyBaseCharacter.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Source\\ACTGame\\Enemy\\EnemyBaseCharacter.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\cusga\\CUSGA_game\\Source\\ACTGame\\Enemy\\EnemyBaseCharacter.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Source\\ACTGame\\Enemy\\EnemyBaseCharacter.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\cusga\\CUSGA_game\\Source\\ACTGame\\Enemy\\AI\\EnemyAIController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Source\\ACTGame\\Enemy\\AI\\EnemyAIController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
@@ -27,6 +35,31 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "EnemyBaseCharacter.cpp",
+              "DocumentMoniker": "G:\\cusga\\CUSGA_game\\Source\\ACTGame\\Enemy\\EnemyBaseCharacter.cpp",
+              "RelativeDocumentMoniker": "Source\\ACTGame\\Enemy\\EnemyBaseCharacter.cpp",
+              "ToolTip": "G:\\cusga\\CUSGA_game\\Source\\ACTGame\\Enemy\\EnemyBaseCharacter.cpp",
+              "RelativeToolTip": "Source\\ACTGame\\Enemy\\EnemyBaseCharacter.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-05-04T04:31:09.332Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "EnemyBaseCharacter.h",
+              "DocumentMoniker": "G:\\cusga\\CUSGA_game\\Source\\ACTGame\\Enemy\\EnemyBaseCharacter.h",
+              "RelativeDocumentMoniker": "Source\\ACTGame\\Enemy\\EnemyBaseCharacter.h",
+              "ToolTip": "G:\\cusga\\CUSGA_game\\Source\\ACTGame\\Enemy\\EnemyBaseCharacter.h",
+              "RelativeToolTip": "Source\\ACTGame\\Enemy\\EnemyBaseCharacter.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-05-04T04:31:09.09Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "EnemyAIController.cpp",
               "DocumentMoniker": "G:\\cusga\\CUSGA_game\\Source\\ACTGame\\Enemy\\AI\\EnemyAIController.cpp",
               "RelativeDocumentMoniker": "Source\\ACTGame\\Enemy\\AI\\EnemyAIController.cpp",
@@ -39,7 +72,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "EnemyAIController.h",
               "DocumentMoniker": "G:\\cusga\\CUSGA_game\\Source\\ACTGame\\Enemy\\AI\\EnemyAIController.h",
               "RelativeDocumentMoniker": "Source\\ACTGame\\Enemy\\AI\\EnemyAIController.h",
@@ -47,8 +80,7 @@
               "RelativeToolTip": "Source\\ACTGame\\Enemy\\AI\\EnemyAIController.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-05-03T01:27:37.866Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-03T01:27:37.866Z"
             },
             {
               "$type": "Bookmark",

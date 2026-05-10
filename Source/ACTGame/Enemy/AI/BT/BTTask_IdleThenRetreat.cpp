@@ -9,8 +9,11 @@ namespace
 {
 	struct FIdleRetreatTaskMemory
 	{
+		// 任务开始时间（世界时间秒），用于计算 idle 截止点
 		float StartTime = 0.0f;
+		// 是否已下发 MoveTo，避免重复调用
 		bool bMoveIssued = false;
+		// 计算出的撤退目标点（已导航投射）
 		FVector RetreatLocation = FVector::ZeroVector;
 	};
 }
@@ -40,6 +43,7 @@ EBTNodeResult::Type UBTTask_IdleThenRetreat::ExecuteTask(UBehaviorTreeComponent&
 
 	Mem->StartTime = SelfChar->GetWorld()->GetTimeSeconds();
 
+	// 期望撤退点：沿“前方反方向”退 RetreatDistance
 	const FVector Desired = SelfChar->GetActorLocation() - SelfChar->GetActorForwardVector().GetSafeNormal2D() * RetreatDistance;
 	FVector Projected = Desired;
 	if (UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(SelfChar->GetWorld()))
@@ -47,6 +51,7 @@ EBTNodeResult::Type UBTTask_IdleThenRetreat::ExecuteTask(UBehaviorTreeComponent&
 		FNavLocation Out;
 		if (NavSys->ProjectPointToNavigation(Desired, Out))
 		{
+			// 投射到可行走区域，避免移动到不可达点
 			Projected = Out.Location;
 		}
 	}
@@ -69,12 +74,14 @@ void UBTTask_IdleThenRetreat::TickTask(UBehaviorTreeComponent& OwnerComp, uint8*
 	const float Now = SelfChar->GetWorld()->GetTimeSeconds();
 	if (!Mem->bMoveIssued)
 	{
+		// idle 时间未到：保持原地等待
 		if (Now < Mem->StartTime + IdleSeconds)
 		{
 			return;
 		}
 
 		AICon->StopMovement();
+		// idle 结束后再下发 MoveTo，后撤到计算出的目标点
 		AICon->MoveToLocation(Mem->RetreatLocation, AcceptanceRadius, true, true, false, true, nullptr, true);
 		Mem->bMoveIssued = true;
 		return;
@@ -87,6 +94,7 @@ void UBTTask_IdleThenRetreat::TickTask(UBehaviorTreeComponent& OwnerComp, uint8*
 		return;
 	}
 
+	// MoveTo 结束：用距离做最终成功/失败判定
 	const float Dist = FVector::Dist(SelfChar->GetActorLocation(), Mem->RetreatLocation);
 	FinishLatentTask(OwnerComp, Dist <= AcceptanceRadius ? EBTNodeResult::Succeeded : EBTNodeResult::Failed);
 }
