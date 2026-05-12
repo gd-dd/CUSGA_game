@@ -40,7 +40,7 @@
               "RelativeDocumentMoniker": "Source\\ACTGame\\Enemy\\EnemyBaseCharacter.cpp",
               "ToolTip": "G:\\cusga\\CUSGA_game\\Source\\ACTGame\\Enemy\\EnemyBaseCharacter.cpp",
               "RelativeToolTip": "Source\\ACTGame\\Enemy\\EnemyBaseCharacter.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAmAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-05-04T04:31:09.332Z",
               "EditorCaption": ""
@@ -80,7 +80,8 @@
               "RelativeToolTip": "Source\\ACTGame\\Enemy\\AI\\EnemyAIController.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-05-03T01:27:37.866Z"
+              "WhenOpened": "2026-05-03T01:27:37.866Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Bookmark",
