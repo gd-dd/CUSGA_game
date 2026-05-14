@@ -1,5 +1,8 @@
-# Visual Studio 2015 user specific files
-#.vs/
+# IDE and Editor generated files
+.vs/
+.vscode/
+.idea/
+*.code-workspace
 
 # Compiled Object files
 *.slo
@@ -40,7 +43,10 @@
 *.sdf
 *.VC.db
 *.VC.opendb
-#.vsconfig
+.vsconfig
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
 
 # Precompiled Assets
 SourceArt/**/*.png
@@ -74,8 +80,6 @@ Plugins/**/Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 
-Content/Assets/MA/1.uasset
-Content/Assets/MA/5.uasset
 
 # Trae IDE directory
 .trae/
