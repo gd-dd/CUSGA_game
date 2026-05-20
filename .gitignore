@@ -27,6 +27,7 @@
 *.la
 *.a
 *.lib
+!Plugins/WwiseSoundEngine/ThirdParty/x64_vc170/**/AkSoundEngine.lib
 
 # Executables
 *.exe
