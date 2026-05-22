@@ -29,7 +29,7 @@ public:
 
 	/** 扇形最大判定距离 */
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	float ConeRange = 300.0f;
+	float ConeRange = 900.0f;
 
 	/** 扇形角度（度） */
 	UPROPERTY(EditAnywhere, Category = "Attack")
