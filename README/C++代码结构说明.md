@@ -144,9 +144,9 @@ Source/ACTGame/
 
 *   **`PlayerCharacter`**
     *   **继承对象**: `ACharacterBase`
-    *   **功能**: 玩家实际控制的角色实体，内部挂载并初始化状态机、输入缓存、动作数据、生命值与武器碰撞等所有玩家侧核心组件。
-    *   **重要变量**: `StateMachine` (状态机), `TargetRotation` (目标朝向), `ActionDataContainer` (动作数据容器)。
-    *   **重要方法**: `PlayCombatMontage` (播放战斗动画接口), `GetTargetRotation` (获取朝向)。
+    *   **功能**: 玩家实际控制的角色实体，内部挂载并初始化状态机、输入缓存、动作数据、生命值与武器碰撞等所有玩家侧核心组件，也是生命值系统的宿主对象。
+    *   **重要变量**: `StateMachine` (状态机), `TargetRotation` (目标朝向), `ActionDataContainer` (动作数据容器), `PlayerHealth` (生命值组件)。
+    *   **重要方法**: `PlayCombatMontage` (播放战斗动画接口), `GetTargetRotation` (获取朝向), `GetPlayerHealth` (向 UI 或其他系统提供生命值组件访问入口)。
 
 ### 3. 数据与子系统模块 (Data, UI, Health, Input, Weapon)
 
@@ -164,9 +164,9 @@ Source/ACTGame/
 
 *   **`PlayerHealth`**
     *   **继承对象**: `UActorComponent`
-    *   **功能**: 玩家生命值组件，严格管理血量逻辑，向外广播生命值变更事件。
-    *   **重要变量**: `CurrentHealth` (当前血量), `MaxHealth` (最大血量), `OnHealthChange` (血量变化委托)。
-    *   **重要方法**: `AddHealth` (增加生命值), `ReduceHealth` (减少生命值)。
+    *   **功能**: 玩家生命值组件，是生命值系统的唯一数据源，统一负责保存最大生命值、当前生命值、加血/扣血边界处理以及生命值变化广播。
+    *   **重要变量**: `CurrentHealth` (当前血量), `MaxHealth` (最大血量), `OnHealthChange` (血量变化委托，用于向 UI 广播当前值与最大值)。
+    *   **重要方法**: `AddHealth` (增加生命值并限制不超过最大值), `ReduceHealth` (减少生命值、限制不低于 0，并返回角色是否死亡)。
 
 *   **`InputCacheSystem`**
     *   **继承对象**: `UActorComponent`
@@ -176,15 +176,15 @@ Source/ACTGame/
 
 *   **`PlayerHud`**
     *   **继承对象**: `UUserWidget`
-    *   **功能**: 玩家界面的 UI 表现层基类，通常在蓝图中继承并绑定血条等进度更新逻辑。
-    *   **重要变量**: 蓝图侧绑定的各种控件。
-    *   **重要方法**: 蓝图实现的更新事件接口。
+    *   **功能**: 玩家界面的 UI 表现层基类，负责在初始化时获取 `PlayerHealth`、绑定 `OnHealthChange`，并将生命值数据转交给蓝图界面更新。
+    *   **重要变量**: 蓝图侧绑定的血条、当前生命值文本、最大生命值文本等控件。
+    *   **重要方法**: `InitializePlayerHud` (完成生命值组件绑定与首次同步), `UpdateHealth` (统一的血量界面更新入口，由蓝图实现具体显示逻辑)。
 
 *   **`UIManager`**
     *   **继承对象**: `AHUD`
-    *   **功能**: 管理玩家主界面 UI 的加载、初始化和销毁，监听底层事件以更新 `PlayerHud`。
-    *   **重要变量**: `PlayerHudClass` (UI蓝图类), `PlayerHudInstance` (实例化UI对象)。
-    *   **重要方法**: `InitializeUI` (初始化UI并挂载), `DestroyUI` (销毁UI)。
+    *   **功能**: 当前玩家 UI 的统一管理层，负责创建、持有和销毁 `PlayerHud`，并保证玩家角色不存在时界面同步销毁。
+    *   **重要变量**: `PlayerHudClass` (UI蓝图类，默认指向 `WBP_PlayerHud`), `PlayerHudInstance` (实例化UI对象)。
+    *   **重要方法**: `InitializeUI` (创建并初始化 `PlayerHud`), `DestroyUI` (销毁界面实例), `Tick` (在角色丢失时回收界面，并在需要时兜底重建)。
 
 *   **`WeaponCollider`**
     *   **继承对象**: `UActorComponent`
@@ -414,11 +414,101 @@ sequenceDiagram
     ANS->>WC: NotifyEnd -> DisableCollider()
 ```
 
+### 3. 玩家生命值系统交互时序
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'background': '#000000', 'primaryColor': '#2D2D2D', 'primaryTextColor': '#FFFFFF', 'lineColor': '#FFFFFF', 'noteBkgColor': '#2D2D2D', 'noteTextColor': '#FFFFFF'}}}%%
+sequenceDiagram
+    participant GM as ACTGameMode
+    participant HUD as UIManager
+    participant Widget as PlayerHud/WBP_PlayerHud
+    participant Player as PlayerCharacter
+    participant Health as PlayerHealth
+
+    GM->>HUD: 指定默认 HUDClass = UIManager
+    HUD->>HUD: BeginPlay()
+    HUD->>Widget: InitializeUI() / CreateWidget()
+    Widget->>Player: 获取拥有者玩家角色
+    Player-->>Widget: GetPlayerHealth()
+    Widget->>Health: 绑定 OnHealthChange
+    Widget->>Widget: UpdateHealth(CurrentHealth, MaxHealth)
+
+    note over Health, Widget: 运行中生命值变化
+    Health->>Health: AddHealth() / ReduceHealth()
+    Health->>Health: 修正上下界
+    Health->>Widget: OnHealthChange(CurrentHealth, MaxHealth)
+    Widget->>Widget: UpdateHealth()
+
+    note over HUD, Widget: 玩家角色不存在时
+    HUD->>HUD: Tick() 检查 Pawn
+    HUD->>Widget: DestroyUI()
+```
+
 ---
 
-## 五、 架构总结与优势
+## 五、 生命值系统相关脚本说明
+
+这一组脚本共同组成了当前玩家生命值系统，职责划分遵循“数据、桥接、显示、生命周期管理”四层结构。
+
+### 1. `Player/Health/PlayerHealth.h/.cpp`
+
+这是生命值系统的核心脚本，负责所有生命值数据的真实存储与变更。
+
+- 维护 `MaxHealth` 和 `CurrentHealth`。
+- 在 `BeginPlay` 中保证最大生命值有效，并把当前生命值初始化到满血状态。
+- `AddHealth` 内部完成加血和上限裁剪。
+- `ReduceHealth` 内部完成扣血、归零和死亡结果返回。
+- 每次血量有效变化后广播 `OnHealthChange(CurrentHealth, MaxHealth)`。
+
+它的定位不是 UI 脚本，而是纯逻辑组件。  
+外部系统不应该直接修改 `CurrentHealth`，而应该统一调用 `AddHealth` 或 `ReduceHealth`。
+
+### 2. `Player/Character/PlayerCharacter.h/.cpp`
+
+这是生命值系统的宿主脚本。
+
+- 在构造阶段挂载 `PlayerHealth` 组件。
+- 通过 `GetPlayerHealth()` 对外暴露访问入口。
+- 自身不负责血条绘制，也不负责生命值边界计算。
+
+它在生命值系统里的意义是把生命值逻辑绑定到玩家角色实体上，让 UI 或战斗系统都能通过玩家角色拿到同一份生命值数据。
+
+### 3. `Player/UI/PlayerHud.h/.cpp`
+
+这是生命值系统的 UI 桥接脚本，位于逻辑层与蓝图表现层之间。
+
+- `InitializePlayerHud` 负责从玩家角色上取得 `PlayerHealth`。
+- 负责把 `OnHealthChange` 绑定到 `UpdateHealth`。
+- 初始化完成后主动调用一次 `UpdateHealth`，确保界面首次显示就是正确血量。
+- 后续不主动轮询生命值，而是被事件驱动刷新。
+
+它本身不承担复杂视觉布局，真正的进度条填充、文本显示和图片表现主要由蓝图 `WBP_PlayerHud` 实现。
+
+### 4. `Player/UI/UIManager.h/.cpp`
+
+这是生命值系统的界面生命周期管理脚本。
+
+- 继承 `AHUD`，作为游戏 HUD 层统一入口。
+- 默认加载 `WBP_PlayerHud` 作为玩家血条界面类。
+- 在 `BeginPlay` 中尝试创建 `PlayerHud`。
+- 在 `Tick` 中检查当前玩家角色是否存在。
+- 当角色不存在时调用 `DestroyUI`，避免旧 HUD 残留。
+
+它不处理血量计算，也不直接修改血条数值，只负责“界面何时创建、何时存在、何时销毁”。
+
+### 5. `Player/Base/GamePlay/ACTGameMode.h/.cpp`
+
+这是生命值系统接入游戏流程的入口脚本。
+
+- 通过 `HUDClass = AUIManager::StaticClass()` 指定当前游戏使用 `UIManager` 作为 HUD。
+
+这一步让生命值界面管理从玩家控制器侧转移到了游戏 HUD 体系中，使 UI 生命周期更清晰，也更符合“统一管理所有 UMG”的结构目标。
+
+---
+
+## 六、 架构总结与优势
 
 1. **职责分离极致化**：输入、逻辑调度、动作表现三层彻底剥离。输入缓存队列消除手感粘滞，动画图表变为纯被动状态，真正实现了所见即所得。
 2. **内存与性能优化**：状态机组件通过对象池 `StateDic` 管理状态复用，避免连击期间高频创建和销毁 `UObject` 对象。
-3. **规范化的数据流**：无论是生命值管理的 `AddHealth` / `ReduceHealth`，还是碰撞检测的 `EnableCollider` / `HitObject` 模型，都保证了内部数据修改的高度收敛。
+3. **规范化的数据流**：无论是生命值管理的 `AddHealth` / `ReduceHealth`，还是碰撞检测的 `EnableCollider` / `HitObject` 模型，都保证了内部数据修改的高度收敛。生命值系统中，`PlayerHealth` 负责数据，`PlayerHud` 负责桥接，`WBP_PlayerHud` 负责显示，`UIManager` 负责生命周期管理。
 4. **易于扩展的 AI 模块**：加入了完整的行为树基础设施，使用 Service 与 Task 搭配实现了模块化的敌人 AI 逻辑。
