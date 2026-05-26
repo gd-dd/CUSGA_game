@@ -4,12 +4,15 @@
 #include "EnhancedPlayerInput.h"
 #include "InputActionValue.h"
 #include "Player/Character/PlayerCharacter.h"
+#include "Player/Health/PlayerHealth.h"
 #include "Player/Input/InputCacheSystem.h"
 #include "Player/StateMachine/PlayerStateMachine.h"
 #include "Player/StateMachine/States/Combo/Attack/Normal/PlayerAttackState_1.h"
 #include "Player/StateMachine/States/Combo/Attack/Special/PlayerSpecialAttackState.h"
 #include "Player/StateMachine/States/Locomotion/PlayerIdleState.h"
 #include "Player/StateMachine/States/Locomotion/PlayerWalkState.h"
+#include "Tools/Game/GameManager.h"
+#include "Tools/Game/SaveGame/SaveActGame.h"
 
 AACTPlayerController::AACTPlayerController()
 {
@@ -24,6 +27,43 @@ void AACTPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	CurrentPlayerCharacter = Cast<APlayerCharacter>(GetCharacter());
+}
+
+void AACTPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	CurrentPlayerCharacter = Cast<APlayerCharacter>(InPawn);
+	InitPlayer();
+}
+
+void AACTPlayerController::InitPlayer()
+{
+	if (!CurrentPlayerCharacter)
+	{
+		return;
+	}
+
+	const UGameManager* GameManager = Cast<UGameManager>(GetGameInstance());
+	if (!GameManager || !GameManager->SaveGameRef)
+	{
+		return;
+	}
+
+	const FPlayerData& PlayerData = GameManager->SaveGameRef->PlayerData;
+	if (!PlayerData.bHasSavedData)
+	{
+		return;
+	}
+
+	CurrentPlayerCharacter->SetActorTransform(PlayerData.Transform);
+
+	if (UPlayerHealth* PlayerHealth = CurrentPlayerCharacter->GetPlayerHealth())
+	{
+		PlayerHealth->SetHealth(PlayerData.HP);
+	}
+
+	SetControlRotation(PlayerData.CameraRotation);
 }
 
 void AACTPlayerController::SetupInputComponent()

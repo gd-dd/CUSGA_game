@@ -24,10 +24,17 @@ class ACTGAME_API AEnemyBaseCharacter : public ACharacterBase
 
 public:
 	AEnemyBaseCharacter();
+	virtual void ReceiveHit(float DamageAmount) override;
 
 	/** 设置眩晕状态（会广播 OnStunChanged） */
 	UFUNCTION(BlueprintCallable, Category = "Enemy|State")
 	void SetStunned(bool bNewStunned);
+
+	UFUNCTION(BlueprintPure, Category = "Enemy|Health")
+	float GetHealth() const { return Health; }
+
+	UFUNCTION(BlueprintPure, Category = "Enemy|Health")
+	float GetMaxHealth() const { return MaxHealth; }
 
 	/** 是否处于眩晕状态 */
 	UFUNCTION(BlueprintPure, Category = "Enemy|State")
@@ -50,6 +57,14 @@ public:
 	void DoDash();
 
 protected:
+	/** 当前生命值 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Health")
+	float Health = 100.0f;
+
+	/** 最大生命值 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Health", meta = (ClampMin = "0.1"))
+	float MaxHealth = 100.0f;
+
 	/** 当前眩晕状态（由 SetStunned 修改） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|State")
 	bool bIsStunned = false;

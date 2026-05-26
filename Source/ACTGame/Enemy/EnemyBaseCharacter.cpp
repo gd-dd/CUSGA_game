@@ -3,6 +3,18 @@
 AEnemyBaseCharacter::AEnemyBaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	Health = MaxHealth;
+}
+
+void AEnemyBaseCharacter::ReceiveHit(float DamageAmount)
+{
+	Health -= DamageAmount;
+
+	if (Health <= 0.0f)
+	{
+		Health = 0.0f;
+		// 此处可以添加敌人死亡逻辑
+	}
 }
 
 void AEnemyBaseCharacter::SetStunned(bool bNewStunned)

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
@@ -24,8 +24,12 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void OnPossess(APawn* InPawn) override;
 	virtual void SetupInputComponent() override;
 	virtual void Tick(float DeltaTime) override;
+
+	// 根据存档初始化当前玩家角色
+	void InitPlayer();
 
 	// 获取当前控制的角色
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

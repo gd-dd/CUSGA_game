@@ -3,9 +3,6 @@
 ACharacterBase::ACharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	
-	MaxHealth = 100.0f;
-	Health = MaxHealth;
 }
 
 void ACharacterBase::BeginPlay()
@@ -25,11 +22,4 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void ACharacterBase::ReceiveHit(float DamageAmount)
 {
-	Health -= DamageAmount;
-	
-	if (Health <= 0.0f)
-	{
-		Health = 0.0f;
-		// 此处可以添加死亡逻辑
-	}
 }

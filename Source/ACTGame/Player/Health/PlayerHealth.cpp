@@ -5,7 +5,6 @@
 UPlayerHealth::UPlayerHealth()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	CurrentHealth = MaxHealth;
 }
 
 void UPlayerHealth::BeginPlay()
@@ -30,6 +29,25 @@ void UPlayerHealth::AddHealth(float HealthAmount)
 		CurrentHealth = MaxHealth;
 	}
 
+	OnHealthChange.Broadcast(CurrentHealth, MaxHealth);
+}
+
+void UPlayerHealth::SetHealth(float HP)
+{
+	if (HP <= 0.0f)
+	{
+		return;
+	}
+
+	MaxHealth = FMath::Max(MaxHealth, 0.1f);
+
+	const float NewHealth = FMath::Clamp(HP, 0.0f, MaxHealth);
+	if (FMath::IsNearlyEqual(CurrentHealth, NewHealth))
+	{
+		return;
+	}
+
+	CurrentHealth = NewHealth;
 	OnHealthChange.Broadcast(CurrentHealth, MaxHealth);
 }
 

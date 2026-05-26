@@ -20,7 +20,13 @@ public:
 	void AddHealth(float HealthAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Player|Health")
+	void SetHealth(float HP);
+
+	UFUNCTION(BlueprintCallable, Category = "Player|Health")
 	bool ReduceHealth(float HealthAmount);
+
+	UFUNCTION(BlueprintPure, Category = "Player|Health")
+	float GetHealth() const { return CurrentHealth; }
 
 	UFUNCTION(BlueprintPure, Category = "Player|Health")
 	float GetCurrentHealth() const { return CurrentHealth; }
