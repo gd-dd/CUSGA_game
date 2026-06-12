@@ -10,7 +10,7 @@ AUIManager::AUIManager()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	static ConstructorHelpers::FClassFinder<UPlayerHud> PlayerHudBlueprintClass(TEXT("/Game/Blueprint/UI/WBP_PlayerHud"));
+	static ConstructorHelpers::FClassFinder<UPlayerHud> PlayerHudBlueprintClass(TEXT("/Game/Blueprint/Widget/WBP_PlayerHud"));
 	if (PlayerHudBlueprintClass.Succeeded())
 	{
 		PlayerHudClass = PlayerHudBlueprintClass.Class;

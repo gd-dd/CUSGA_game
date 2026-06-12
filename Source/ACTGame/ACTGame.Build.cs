@@ -15,7 +15,7 @@ public class ACTGame : ModuleRules
 			}
 		);
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput","UMG","GameplayTasks","AIModule","NavigationSystem","AkAudio"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput","UMG","GameplayTasks","AIModule","NavigationSystem","AkAudio","SmartObjectsModule"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
