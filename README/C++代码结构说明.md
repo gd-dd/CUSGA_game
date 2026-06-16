@@ -87,7 +87,7 @@ Source/ACTGame/
 │   ├── Data/                       # 数据驱动层
 │   │   └── Action/                 # 动作数据容器与资产
 │   ├── Health/                     # 生命值系统
-│   │   └── PlayerHealth.h/cpp      # 生命值组件 (AddHealth/ReduceHealth)
+│   │   └── PlayerHealth.h/cpp      # 生命值组件 (AddHealth/ReduceHealth/OnPlayerDeath)
 │   ├── Input/                      # 输入缓存系统
 │   │   └── InputCacheSystem.h/cpp  # TQueue 输入指令队列
 │   ├── UI/                         # UI 系统
@@ -228,14 +228,15 @@ Source/ACTGame/
 
 **`PlayerHealth.h / .cpp`**
 *   **继承对象**: `UActorComponent`
-*   **功能**: 玩家生命值组件，负责统一管理加血、扣血以及血量变化广播。
+*   **功能**: 玩家生命值组件，负责统一管理加血、扣血以及血量/死亡事件广播。
 *   **重要变量**:
     *   `MaxHealth`: 最大生命值。
     *   `CurrentHealth`: 当前生命值。
     *   `OnHealthChange`: 血量变化委托。
+    *   `OnPlayerDeath`: 玩家死亡事件委托。
 *   **重要方法**:
     *   `AddHealth(float HealthAmount)`: 增加生命值。
-    *   `ReduceHealth(float HealthAmount)`: 减少生命值并返回角色是否死亡。
+    *   `ReduceHealth(float HealthAmount)`: 减少生命值，并在生命值归零时广播死亡事件。
     *   `GetCurrentHealth()`: 获取当前血量。
     *   `GetMaxHealth()`: 获取最大血量。
 
@@ -733,6 +734,7 @@ sequenceDiagram
     Health->>Health: 修正上下界
     Health->>Widget: OnHealthChange(CurrentHealth, MaxHealth)
     Widget->>Widget: UpdateHealth()
+    Health->>Health: 血量归零时广播 OnPlayerDeath(true)
 
     note over HUD, Widget: 玩家角色不存在时
     HUD->>HUD: Tick() 检查 Pawn
@@ -772,7 +774,7 @@ sequenceDiagram
 
 这一组脚本负责“血量数据 -> 角色挂载 -> HUD 桥接 -> UI 生命周期”。
 
-- `Player/Health/PlayerHealth.h / .cpp`：维护 `CurrentHealth`、`MaxHealth`，统一处理 `AddHealth`、`ReduceHealth` 和 `OnHealthChange` 广播。
+- `Player/Health/PlayerHealth.h / .cpp`：维护 `CurrentHealth`、`MaxHealth`，统一处理 `AddHealth`、`ReduceHealth`、`OnHealthChange` 和 `OnPlayerDeath` 广播。
 - `Player/Character/PlayerCharacter.h / .cpp`：挂载 `PlayerHealth` 并向外提供 `GetPlayerHealth()` 访问入口；当前尚未接入玩家具体受击方案。
 - `Player/UI/PlayerHud.h / .cpp`：负责绑定 `PlayerHealth` 事件，并把血量变化转给蓝图界面表现。
 - `Player/UI/UIManager.h / .cpp`：负责创建、持有和销毁 `PlayerHud`。
@@ -796,5 +798,5 @@ sequenceDiagram
 
 1. **职责分离极致化**：输入、逻辑调度、动作表现三层彻底剥离。输入缓存队列消除手感粘滞，动画图表变为纯被动状态，真正实现了所见即所得。
 2. **内存与性能优化**：状态机组件通过对象池 `StateDic` 管理状态复用，避免连击期间高频创建和销毁 `UObject` 对象。
-3. **规范化的数据流**：无论是生命值管理的 `AddHealth` / `ReduceHealth`，还是碰撞检测的 `EnableCollider` / `HitObject` 模型，都保证了内部数据修改的高度收敛。生命值系统中，`PlayerHealth` 负责数据，`PlayerHud` 负责桥接，`WBP_PlayerHud` 负责显示，`UIManager` 负责生命周期管理。
+3. **规范化的数据流**：无论是生命值管理的 `AddHealth` / `ReduceHealth` / `OnPlayerDeath`，还是碰撞检测的 `EnableCollider` / `HitObject` 模型，都保证了内部数据修改的高度收敛。生命值系统中，`PlayerHealth` 负责数据，`PlayerHud` 负责桥接，`WBP_PlayerHud` 负责显示，`UIManager` 负责生命周期管理。
 4. **易于扩展的 AI 模块**：加入了完整的行为树基础设施，使用 Service 与 Task 搭配实现了模块化的敌人 AI 逻辑。

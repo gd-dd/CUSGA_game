@@ -33,7 +33,7 @@ ACTGame 是一个基于 Unreal Engine 5.4 的第三人称动作游戏项目，�
 - 战斗数据驱动
   - `ActionData` 和 `ActionDataContainer` 负责把动作状态与数据资产映射起来
 - 生命值与 UI
-  - `PlayerHealth` 提供 `AddHealth`、`ReduceHealth` 和 `OnHealthChange`
+  - `PlayerHealth` 提供 `AddHealth`、`ReduceHealth`、`OnHealthChange` 和 `OnPlayerDeath`
   - `UIManager` 负责主 HUD 的创建与更新
 - 敌人 AI
   - `EnemyBaseCharacter` 作为敌人基类

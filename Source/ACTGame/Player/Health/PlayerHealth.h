@@ -5,6 +5,7 @@
 #include "PlayerHealth.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChangeSignature, float, CurrentHealth, float, MaxHealth);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDeathSignature, bool, bIsDead);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ACTGAME_API UPlayerHealth : public UActorComponent
@@ -23,7 +24,7 @@ public:
 	void SetHealth(float HP);
 
 	UFUNCTION(BlueprintCallable, Category = "Player|Health")
-	bool ReduceHealth(float HealthAmount);
+	void ReduceHealth(float HealthAmount);
 
 	UFUNCTION(BlueprintPure, Category = "Player|Health")
 	float GetHealth() const { return CurrentHealth; }
@@ -37,6 +38,9 @@ public:
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Player|Health")
 	FOnHealthChangeSignature OnHealthChange;
+
+	UPROPERTY(BlueprintAssignable, Category = "Player|Health")
+	FOnPlayerDeathSignature OnPlayerDeath;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Health", meta = (ClampMin = "0.1"))

@@ -51,13 +51,11 @@ void UPlayerHealth::SetHealth(float HP)
 	OnHealthChange.Broadcast(CurrentHealth, MaxHealth);
 }
 
-bool UPlayerHealth::ReduceHealth(float HealthAmount)
+void UPlayerHealth::ReduceHealth(float HealthAmount)
 {
-	bool bIsDead = false;
-
 	if (HealthAmount <= 0.0f || CurrentHealth <= 0.0f)
 	{
-		return bIsDead;
+		return;
 	}
 
 	CurrentHealth -= HealthAmount;
@@ -65,10 +63,12 @@ bool UPlayerHealth::ReduceHealth(float HealthAmount)
 	if (CurrentHealth <= 0.0f)
 	{
 		CurrentHealth = 0.0f;
-		bIsDead = true;
 	}
 
 	OnHealthChange.Broadcast(CurrentHealth, MaxHealth);
 
-	return bIsDead;
+	if (CurrentHealth <= 0.0f)
+	{
+		OnPlayerDeath.Broadcast(true);
+	}
 }
