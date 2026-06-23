@@ -1,4 +1,4 @@
-#include "PlayerStateMachine.h"
+﻿#include "PlayerStateMachine.h"
 #include "Player/Data/Action/ActionData.h"
 #include "Player/Character/PlayerCharacter.h"
 #include "Player/Character/ACTPlayerController.h"
@@ -10,6 +10,7 @@
 #include "Player/StateMachine/States/Combo/Attack/Normal/PlayerAttackState_1.h"
 #include "Player/StateMachine/States/Combo/Evade/PlayerEvadeState.h"
 #include "Player/StateMachine/States/Combo/Attack/Special/PlayerSpecialAttackState.h"
+#include "Player/StateMachine/States/PlayerStateBase.h"
 
 UPlayerStateMachine::UPlayerStateMachine()
 {
@@ -28,54 +29,85 @@ void UPlayerStateMachine::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 	if (CurrentState)
 	{
-		CurrentState->UpdateState(DeltaTime);
-	}
-}
-
-void UPlayerStateMachine::Stop()
-{
-	if (CurrentState)
-	{
-		CurrentState->ExitState();
-		CurrentState = nullptr;
+		CurrentState->Update(DeltaTime);
 	}
 }
 
 void UPlayerStateMachine::EnterState(UClass* StateClass)
 {
-	if (!StateClass) return;
-
-	if (!StateDic.Contains(StateClass))
+	if (!StateClass || !StateClass->IsChildOf(UPlayerStateBase::StaticClass()))
 	{
-		// 如果字典中没有该状态，则实例化并进行依赖注入
-		UPlayerStateBase* NewState = NewObject<UPlayerStateBase>(this, StateClass);
-		if (NewState)
-		{
-			// 获取相关的组件引用
-			APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwner());
-			UInputCacheSystem* InputCache = nullptr;
-			
-			NewState->Init(PlayerCharacter, this, InputCache);
-			StateDic.Add(StateClass, NewState);
-		}
+		return;
+	}
+
+	if (CurrentState && CurrentState->GetClass() == StateClass)
+	{
+		return;
+	}
+
+	UPlayerStateBase* NextState = LoadState(StateClass);
+	if (!NextState)
+	{
+		return;
+	}
+
+	ExitCurrentState();
+	EnterCurrentState(NextState);
+}
+
+UPlayerStateBase* UPlayerStateMachine::LoadState(UClass* StateClass)
+{
+	if (!StateClass || !StateClass->IsChildOf(UPlayerStateBase::StaticClass()))
+	{
+		return nullptr;
 	}
 
 	if (UPlayerStateBase** FoundState = StateDic.Find(StateClass))
 	{
-		if (CurrentState)
-		{
-			CurrentState->ExitState();
-		}
-
-		CurrentState = *FoundState;
-		
-		if (CurrentState)
-		{
-			// 调试信息：只在后台输出，不占用屏幕
-			DEBUG_LOG(TEXT("[StateMachine] EnterState: %s"), *StateClass->GetName());
-			CurrentState->EnterState();
-		}
+		return *FoundState;
 	}
+
+	// 如果状态未创建，则实例化并注入依赖
+	UPlayerStateBase* NewState = NewObject<UPlayerStateBase>(this, StateClass);
+	if (!NewState)
+	{
+		return nullptr;
+	}
+
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwner());
+	NewState->Init(PlayerCharacter, this, nullptr);
+	StateDic.Add(StateClass, NewState);
+	return NewState;
+}
+
+void UPlayerStateMachine::EnterCurrentState(UPlayerStateBase* NewState)
+{
+	CurrentState = NewState;
+	if (!CurrentState)
+	{
+		return;
+	}
+
+	// 调试信息只输出到日志
+	DEBUG_LOG(TEXT("[StateMachine] EnterState: %s"), *CurrentState->GetClass()->GetName());
+	CurrentState->Enter();
+}
+
+void UPlayerStateMachine::ExitCurrentState()
+{
+	if (!CurrentState)
+	{
+		return;
+	}
+
+	CurrentState->Exit();
+	CurrentState = nullptr;
+}
+
+void UPlayerStateMachine::Stop()
+{
+	ExitCurrentState();
+	StateDic.Empty();
 }
 
 void UPlayerStateMachine::StateInvoke(EInputType InputType)
@@ -87,7 +119,7 @@ void UPlayerStateMachine::StateInvoke(EInputType InputType)
 		{
 			UClass* CurrentClass = CurrentStateObj->GetClass();
 			
-			// 1. 如果在非攻击状态（Idle 或 Walk），直接进入第一段攻击
+			// 1. 非攻击状态下，直接进入第一段攻击
 			if (CurrentClass->IsChildOf(UPlayerIdleState::StaticClass()) || CurrentClass->IsChildOf(UPlayerWalkState::StaticClass()))
 			{
 				if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwner()))
@@ -103,7 +135,7 @@ void UPlayerStateMachine::StateInvoke(EInputType InputType)
 				EnterState(UPlayerAttackState_1::StaticClass());
 				return;
 			}
-			// 2. 如果在攻击状态中，且处于退出窗口（CanMontageExit == true），按下攻击键意味着掉连击并重新开始第一段
+			// 2. 攻击状态处于退出窗口时，重新进入第一段攻击
 			else if (CurrentClass->IsChildOf(UPlayerAttackStateBase::StaticClass()))
 			{
 				UPlayerAttackStateBase* AttackState = Cast<UPlayerAttackStateBase>(CurrentStateObj);
@@ -124,7 +156,7 @@ void UPlayerStateMachine::StateInvoke(EInputType InputType)
 				}
 			}
 			
-			// 其他情况（攻击中且没到退出窗口）：按键已被存入缓存，无需操作，等待 ComboUpdate 取出即可
+			// 其他情况只保留输入缓存，等待 ComboUpdate 消费
 		}
 	}
 	else if (InputType == EInputType::Evade)
@@ -153,7 +185,7 @@ void UPlayerStateMachine::StateInvoke(EInputType InputType)
 		{
 			UClass* CurrentClass = CurrentStateObj->GetClass();
 			
-			// 当当前状态为 Idle 或 Walk 时，清空缓存并进入特殊技状态
+			// Idle 或 Walk 状态下，清空缓存并进入特殊技状态
 			if (CurrentClass->IsChildOf(UPlayerIdleState::StaticClass()) || CurrentClass->IsChildOf(UPlayerWalkState::StaticClass()))
 			{
 				if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwner()))
@@ -203,9 +235,9 @@ void UPlayerStateMachine::ComboUpdate()
 				// 获取并消费一个缓存输入
 				if (CacheSys->GetCache(CachedInput))
 				{
-					// 如果拿到了有效指令，执行状态重入派发
+					// 如果拿到有效指令，则执行状态重入派发
 					StateReInvoke(CachedInput);
-					// 成功处理后，清空队列，防止“吃指令”或“连放技能”
+					// 成功处理后清空队列，防止重复消费
 					CacheSys->ClearCache();
 				}
 			}
@@ -241,3 +273,5 @@ void UPlayerStateMachine::StateReInvoke(EInputType InputType)
 		}
 	}
 }
+
+

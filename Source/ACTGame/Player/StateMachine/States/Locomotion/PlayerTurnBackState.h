@@ -8,7 +8,7 @@
 
 /**
  * 独立转身状态
- * 负责处理超过135度急停转身的逻辑，根据起步脚播放对应的转身动画，结束后切回Idle或Walk
+ * 负责处理急停转身逻辑，动画结束后切回 Idle 或 Walk。
  */
 UCLASS()
 class ACTGAME_API UPlayerTurnBackState : public UPlayerStateBase
@@ -16,12 +16,13 @@ class ACTGAME_API UPlayerTurnBackState : public UPlayerStateBase
 	GENERATED_BODY()
 
 public:
-	virtual void EnterState() override;
-	virtual void UpdateState(float DeltaTime) override;
-	virtual void ExitState() override;
+	virtual void Enter() override;
+	virtual void Update(float DeltaTime) override;
+	virtual void Exit() override;
 
 private:
-	// 动画播放结束的回调绑定 (如果使用Montage驱动转身)
+	// 动画结束回调预留
 	// UFUNCTION()
 	// void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 };
+

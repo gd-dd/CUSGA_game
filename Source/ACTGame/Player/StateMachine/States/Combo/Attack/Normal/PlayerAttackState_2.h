@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Player/StateMachine/States/Combo/Attack/PlayerAttackStateBase.h"
@@ -17,9 +17,9 @@ class ACTGAME_API UPlayerAttackState_2 : public UPlayerAttackStateBase
 public:
 	UPlayerAttackState_2();
 	
-	virtual void EnterState() override;
-	virtual void UpdateState(float DeltaTime) override;
-	virtual void ExitState() override;
+	virtual void Enter() override;
+	virtual void Update(float DeltaTime) override;
+	virtual void Exit() override;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Animation")
@@ -29,3 +29,4 @@ private:
 	UFUNCTION()
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 };
+

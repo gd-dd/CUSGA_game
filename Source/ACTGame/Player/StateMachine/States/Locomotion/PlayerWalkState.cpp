@@ -1,4 +1,4 @@
-#include "PlayerWalkState.h"
+﻿#include "PlayerWalkState.h"
 #include "Player/Character/PlayerCharacter.h"
 #include "Player/Animation/PlayerAnimInstance.h"
 #include "Player/Character/ACTPlayerController.h"
@@ -9,16 +9,16 @@
 #include "InputActionValue.h"
 #include "Kismet/KismetMathLibrary.h"
 
-void UPlayerWalkState::EnterState()
+void UPlayerWalkState::Enter()
 {
-	Super::EnterState();
+	Super::Enter();
 	
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, TEXT("[SM] Enter State: Walk"));
 	}
 	
-	TurnBackTimer = 0.0f; // 重置计时器
+	TurnBackTimer = 0.0f; // 重置转身计时器
 	CheckRunTimer = 0.0f; // 重置起跑计时器
 	
 	if (UPlayerAnimInstance* Anim = GetAnimInstance())
@@ -27,14 +27,14 @@ void UPlayerWalkState::EnterState()
 	}
 }
 
-void UPlayerWalkState::UpdateState(float DeltaTime)
+void UPlayerWalkState::Update(float DeltaTime)
 {
-	Super::UpdateState(DeltaTime);
+	Super::Update(DeltaTime);
 	
-	// 注意：连击轮询已被重构到 PlayerStateMachine::StateInvoke 中集中调度
+	// 连击轮询已被重构到 PlayerStateMachine::StateInvoke 中集中处理
 	// 这里不再主动消费 InputCacheSystem 中的攻击指令
 
-	// 2. 检查移动输入是否结束，以及更新速度与旋转
+	// 2. 检查移动输入是否结束，并更新速度与旋转
 	if (Character && StateMachine)
 	{
 		if (AACTPlayerController* PC = Cast<AACTPlayerController>(Character->GetController()))
@@ -47,18 +47,18 @@ void UPlayerWalkState::UpdateState(float DeltaTime)
 				
 				if (MoveSizeSquared <= 0.01f)
 				{
-					// 如果没有移动输入了，回到 Idle 状态
+					// 如果没有移动输入，则回到 Idle 状态
 					StateMachine->EnterState<UPlayerIdleState>();
 					return;
 				}
 				
-				// 完美复刻原蓝图逻辑：累加时间并判断是否进入奔跑状态
+				// 累加时间并判断是否进入奔跑状态
 				if (UPlayerAnimInstance* Anim = GetAnimInstance())
 				{
 					if (!Anim->IsRunning)
 					{
 						CheckRunTimer += DeltaTime;
-						// 假设 Run Start Duration 是 3.0 秒 (您可以根据项目实际值调整)
+						// 这里暂时使用 3.0 秒作为起跑阈值
 						if (CheckRunTimer >= 3.0f)
 						{
 							Anim->IsRunning = true;
@@ -74,12 +74,12 @@ void UPlayerWalkState::UpdateState(float DeltaTime)
 				FRotator RelativeRotator = UKismetMathLibrary::NormalizedDeltaRotator(TargetRotation, CurrentRotation);
 				float AbsYaw = FMath::Abs(RelativeRotator.Yaw);
 
-				// 判断是否触发急停转身 (前置条件：必须处于奔跑状态)
+				// 判断是否触发急停转身，前提是当前处于奔跑状态
 				bool bIsRunning = GetAnimInstance() ? GetAnimInstance()->IsRunning : false;
 				if (bIsRunning && AbsYaw > 175.0f && AbsYaw < 185.0f)
 				{
 					TurnBackTimer += DeltaTime;
-					if (TurnBackTimer > 0.1f) // 假设防手抖阈值为 0.1 秒
+					if (TurnBackTimer > 0.1f) // 防手抖阈值
 					{
 						TurnBackTimer = 0.0f;
 						if (UPlayerAnimInstance* Anim = GetAnimInstance())
@@ -104,12 +104,14 @@ void UPlayerWalkState::UpdateState(float DeltaTime)
 	}
 }
 
-void UPlayerWalkState::ExitState()
+void UPlayerWalkState::Exit()
 {
-	Super::ExitState();
+	Super::Exit();
 	
 	if (UPlayerAnimInstance* Anim = GetAnimInstance())
 	{
 		// 暂时留空，让目标状态决定要怎么处理动画变量
 	}
 }
+
+

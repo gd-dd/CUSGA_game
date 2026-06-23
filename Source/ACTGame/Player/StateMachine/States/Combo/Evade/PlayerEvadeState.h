@@ -17,9 +17,9 @@ class ACTGAME_API UPlayerEvadeState : public UPlayerAttackStateBase
 public:
 	UPlayerEvadeState();
 
-	virtual void EnterState() override;
-	virtual void UpdateState(float DeltaTime) override;
-	virtual void ExitState() override;
+	virtual void Enter() override;
+	virtual void Update(float DeltaTime) override;
+	virtual void Exit() override;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Animation")
@@ -38,3 +38,4 @@ private:
 	// 是否需要跟随摇杆输入平滑转向
 	bool bShouldRotate;
 };
+

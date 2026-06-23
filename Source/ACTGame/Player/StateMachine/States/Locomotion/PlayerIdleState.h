@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Player/StateMachine/States/PlayerStateBase.h"
@@ -13,7 +13,8 @@ class ACTGAME_API UPlayerIdleState : public UPlayerStateBase
 	GENERATED_BODY()
 
 public:
-	virtual void EnterState() override;
-	virtual void UpdateState(float DeltaTime) override;
-	virtual void ExitState() override;
+	virtual void Enter() override;
+	virtual void Update(float DeltaTime) override;
+	virtual void Exit() override;
 };
+

@@ -10,9 +10,9 @@ UPlayerAttackState_3::UPlayerAttackState_3()
 {
 }
 
-void UPlayerAttackState_3::EnterState()
+void UPlayerAttackState_3::Enter()
 {
-	Super::EnterState();
+	Super::Enter();
 	SetCanMontageExit(false);
 	
 	if (UActionData* MyData = GetActionData())
@@ -31,18 +31,18 @@ void UPlayerAttackState_3::EnterState()
 	}
 }
 
-void UPlayerAttackState_3::UpdateState(float DeltaTime)
+void UPlayerAttackState_3::Update(float DeltaTime)
 {
-	Super::UpdateState(DeltaTime);
+	Super::Update(DeltaTime);
 
-	// 注意：此处不再轮询缓存。
-	// 原蓝图中，连击的触发完全由动画通知事件（ANS_AttackCombo -> ComboUpdate()）驱动。
-	// 退出窗口重入则由 StateInvoke 配合 CanMontageExit 判断处理。
+	// 这里不再轮询缓存
+	// 连击由动画通知事件驱动
+	// 退出窗口重入由 StateInvoke 配合 CanMontageExit 处理
 }
 
-void UPlayerAttackState_3::ExitState()
+void UPlayerAttackState_3::Exit()
 {
-	Super::ExitState();
+	Super::Exit();
 	SetCanMontageExit(false);
 	
 	if (Character)
@@ -64,3 +64,5 @@ void UPlayerAttackState_3::OnMontageEnded(UAnimMontage* Montage, bool bInterrupt
 		}
 	}
 }
+
+

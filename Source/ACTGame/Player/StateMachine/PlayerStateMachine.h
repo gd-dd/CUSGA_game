@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
@@ -69,6 +69,10 @@ public:
 	void Stop();
 
 private:
+	UPlayerStateBase* LoadState(UClass* StateClass);
+	void EnterCurrentState(UPlayerStateBase* NewState);
+	void ExitCurrentState();
+
 	UPROPERTY()
 	UPlayerStateBase* CurrentState;
 

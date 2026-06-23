@@ -1,4 +1,4 @@
-#include "PlayerStateBase.h"
+﻿#include "PlayerStateBase.h"
 #include "Player/Character/PlayerCharacter.h"
 #include "Player/Character/ACTPlayerController.h"
 #include "Player/Animation/PlayerAnimInstance.h"
@@ -10,7 +10,7 @@ void UPlayerStateBase::Init(APlayerCharacter* InCharacter, UPlayerStateMachine* 
 {
 	Character = InCharacter;
 	StateMachine = InStateMachine;
-	// 由于 InputCacheSystem 迁移到了 Controller，这里我们不再使用传进来的指针
+	// InputCacheSystem 已迁移到 Controller，这里不再使用传入指针
 	InputCacheSystem = nullptr;
 }
 
@@ -20,8 +20,8 @@ UActionData* UPlayerStateBase::GetActionData() const
 	{
 		if (UActionDataContainer* Container = Character->GetActionDataContainer())
 		{
-			// 遍历容器中的 Map，使用 IsChildOf 进行兼容性匹配
-			// 这样即使容器里配的是 C++ 基类，而运行时是蓝图子类，也能正确匹配到数据
+			// 使用 IsChildOf 进行兼容匹配
+			// 即使配置的是 C++ 基类，也能匹配到蓝图子类状态
 			for (const auto& Pair : Container->StateToDataMap)
 			{
 				UClass* ConfiguredClass = Pair.Key;
@@ -35,17 +35,17 @@ UActionData* UPlayerStateBase::GetActionData() const
 	return nullptr;
 }
 
-void UPlayerStateBase::EnterState()
+void UPlayerStateBase::Enter()
 {
 	// 默认空实现，子类重写
 }
 
-void UPlayerStateBase::UpdateState(float DeltaTime)
+void UPlayerStateBase::Update(float DeltaTime)
 {
 	// 默认空实现，子类重写
 }
 
-void UPlayerStateBase::ExitState()
+void UPlayerStateBase::Exit()
 {
 	// 默认空实现，子类重写
 }
@@ -94,4 +94,6 @@ FInputActionValue UPlayerStateBase::GetInputActionValue(const UInputAction* Acti
 	}
 	return FInputActionValue();
 }
+
+
 

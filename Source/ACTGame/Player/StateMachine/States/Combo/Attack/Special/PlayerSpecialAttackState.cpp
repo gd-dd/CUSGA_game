@@ -5,9 +5,9 @@
 #include "Player/StateMachine/States/Locomotion/PlayerIdleState.h"
 #include "Player/Data/Action/ActionData.h"
 
-void UPlayerSpecialAttackState::EnterState()
+void UPlayerSpecialAttackState::Enter()
 {
-	Super::EnterState();
+	Super::Enter();
 	SetCanMontageExit(false);
 
 	if (UActionData* MyData = GetActionData())
@@ -28,14 +28,14 @@ void UPlayerSpecialAttackState::EnterState()
 	}
 }
 
-void UPlayerSpecialAttackState::UpdateState(float DeltaTime)
+void UPlayerSpecialAttackState::Update(float DeltaTime)
 {
-	Super::UpdateState(DeltaTime);
+	Super::Update(DeltaTime);
 }
 
-void UPlayerSpecialAttackState::ExitState()
+void UPlayerSpecialAttackState::Exit()
 {
-	Super::ExitState();
+	Super::Exit();
 	SetCanMontageExit(false);
 	
 	// 解绑回调以防内存泄漏
@@ -58,3 +58,5 @@ void UPlayerSpecialAttackState::OnMontageEnded(UAnimMontage* Montage, bool bInte
 		}
 	}
 }
+
+

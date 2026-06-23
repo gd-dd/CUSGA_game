@@ -12,9 +12,9 @@ UPlayerEvadeState::UPlayerEvadeState()
 {
 }
 
-void UPlayerEvadeState::EnterState()
+void UPlayerEvadeState::Enter()
 {
-	Super::EnterState();
+	Super::Enter();
 
 	if (!Character || !StateMachine) return;
 
@@ -54,7 +54,7 @@ void UPlayerEvadeState::EnterState()
 
 	UAnimMontage* MontageToPlay = nullptr;
 
-	// 有输入时播放前向闪避并对齐朝向
+	// 有输入时播放前向闪避，并对齐朝向
 	if (bHasMoveInput)
 	{
 		MontageToPlay = AM_Evade_Front;
@@ -76,15 +76,15 @@ void UPlayerEvadeState::EnterState()
 	}
 	else
 	{
-		// 容错处理：如果蒙太奇为空（加载失败），立刻切回 Idle 防止状态机卡死
+		// 容错处理：如果蒙太奇为空，立刻切回 Idle，防止状态机卡死
 		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Evade Montage is NULL!"));
 		StateMachine->EnterState<UPlayerIdleState>();
 	}
 }
 
-void UPlayerEvadeState::UpdateState(float DeltaTime)
+void UPlayerEvadeState::Update(float DeltaTime)
 {
-	Super::UpdateState(DeltaTime);
+	Super::Update(DeltaTime);
 
 	// 根据输入平滑转向
 	if (bShouldRotate && Character)
@@ -97,9 +97,9 @@ void UPlayerEvadeState::UpdateState(float DeltaTime)
 	}
 }
 
-void UPlayerEvadeState::ExitState()
+void UPlayerEvadeState::Exit()
 {
-	Super::ExitState();
+	Super::Exit();
 
 	// 清理委托
 	if (UAnimInstance* AnimInstance = GetAnimInstance())
@@ -110,9 +110,11 @@ void UPlayerEvadeState::ExitState()
 
 void UPlayerEvadeState::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	// 动画结束回退到待机
+	// 动画结束后回退到待机状态
 	if (StateMachine)
 	{
 		StateMachine->EnterState<UPlayerIdleState>();
 	}
 }
+
+

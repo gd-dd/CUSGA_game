@@ -1,4 +1,4 @@
-#include "PlayerIdleState.h"
+﻿#include "PlayerIdleState.h"
 #include "Player/StateMachine/PlayerStateMachine.h"
 #include "Player/Input/InputCacheSystem.h"
 #include "Player/Animation/PlayerAnimInstance.h"
@@ -7,9 +7,9 @@
 #include "Player/Character/ACTPlayerController.h"
 #include "InputActionValue.h"
 
-void UPlayerIdleState::EnterState()
+void UPlayerIdleState::Enter()
 {
-	Super::EnterState();
+	Super::Enter();
 	
 	if (GEngine)
 	{
@@ -23,16 +23,16 @@ void UPlayerIdleState::EnterState()
 	}
 }
 
-void UPlayerIdleState::UpdateState(float DeltaTime)
+void UPlayerIdleState::Update(float DeltaTime)
 {
-	Super::UpdateState(DeltaTime);
+	Super::Update(DeltaTime);
 	
 	
 	
-	// 注意：连击轮询已被重构到 PlayerStateMachine::StateInvoke 中集中调度
+	// 连击轮询已被重构到 PlayerStateMachine::StateInvoke 中集中处理
 	// 这里不再主动消费 InputCacheSystem 中的攻击指令
 
-	// 2. 检查移动输入的值，如果不为0，则进入 Walk 状态
+	// 2. 检查移动输入，如果不为 0 则进入 Walk 状态
 	if (Character && StateMachine)
 	{
 		if (AACTPlayerController* PC = Cast<AACTPlayerController>(Character->GetController()))
@@ -40,7 +40,7 @@ void UPlayerIdleState::UpdateState(float DeltaTime)
 			if (UInputAction* MoveAction = PC->GetMoveAction())
 			{
 				FInputActionValue MoveValue = GetInputActionValue(MoveAction);
-				// 增强输入的值通常是 Vector2D，获取其大小
+				// 增强输入的值通常是 Vector2D，这里取其平方长度
 				if (MoveValue.Get<FVector2D>().SizeSquared() > 0.01f)
 				{
 					StateMachine->EnterState<UPlayerWalkState>();
@@ -51,8 +51,10 @@ void UPlayerIdleState::UpdateState(float DeltaTime)
 	}
 }
 
-void UPlayerIdleState::ExitState()
+void UPlayerIdleState::Exit()
 {
-	Super::ExitState();
+	Super::Exit();
 	// TODO: 实现退出空闲状态的逻辑
 }
+
+

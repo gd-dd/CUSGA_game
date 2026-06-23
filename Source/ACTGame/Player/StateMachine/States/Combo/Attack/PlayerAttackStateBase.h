@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Player/StateMachine/States/PlayerStateBase.h"
@@ -12,8 +12,8 @@ class ACTGAME_API UPlayerAttackStateBase : public UPlayerStateBase
 public:
 	UPlayerAttackStateBase();
 
-	virtual void EnterState() override;
-	virtual void ExitState() override;
+	virtual void Enter() override;
+	virtual void Exit() override;
 
 	void SetCanMontageExit(bool bInCanMontageExit);
 
@@ -29,3 +29,4 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Combat|Damage")
 	float BaseDamage = 10.0f;
 };
+

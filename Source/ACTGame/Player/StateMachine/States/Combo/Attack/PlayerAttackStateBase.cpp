@@ -1,4 +1,4 @@
-#include "PlayerAttackStateBase.h"
+﻿#include "PlayerAttackStateBase.h"
 #include "Player/Character/PlayerCharacter.h"
 #include "Player/Weapon/WeaponCollider.h"
 #include "Components/PrimitiveComponent.h"
@@ -11,9 +11,9 @@ UPlayerAttackStateBase::UPlayerAttackStateBase()
 	bCanMontageExit = false;
 }
 
-void UPlayerAttackStateBase::EnterState()
+void UPlayerAttackStateBase::Enter()
 {
-	Super::EnterState();
+	Super::Enter();
 
 	if (!Character)
 	{
@@ -27,7 +27,7 @@ void UPlayerAttackStateBase::EnterState()
 	}
 }
 
-void UPlayerAttackStateBase::ExitState()
+void UPlayerAttackStateBase::Exit()
 {
 	if (Character)
 	{
@@ -37,7 +37,7 @@ void UPlayerAttackStateBase::ExitState()
 		}
 	}
 
-	Super::ExitState();
+	Super::Exit();
 }
 
 void UPlayerAttackStateBase::SetCanMontageExit(bool bInCanMontageExit)
@@ -82,7 +82,7 @@ void UPlayerAttackStateBase::HandleHitTarget(const FHitResult& HitObject)
 		nullptr
 	);
 
-	// --- 记录玩家战斗数据 (连击与伤害) ---
+	// 记录玩家战斗数据
 	if (AACTPlayerState* PS = Character->GetPlayerState<AACTPlayerState>())
 	{
 		PS->RecordHit(BaseDamage);
@@ -94,3 +94,5 @@ void UPlayerAttackStateBase::HandleHitTarget(const FHitResult& HitObject)
 		*HitFromDirection.ToString()
 	);
 }
+
+
