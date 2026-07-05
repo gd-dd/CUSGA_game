@@ -321,19 +321,17 @@ Source/ACTGame/
 
 **`PlayerStateMachine.h / .cpp`**
 *   **继承对象**: `UActorComponent`
-*   **功能**: 玩家状态机组件，负责统一驱动状态生命周期、维护状态对象池，并处理普通攻击、特殊攻击、闪避的输入派发以及连段重入调度。
+*   **功能**: 玩家状态机组件，负责管理当前状态、对象池缓存以及连招输入的起手与派生调度。
 *   **重要变量**:
     *   `CurrentState`: 当前激活状态。
-    *   `StateDic`: 以状态类为键缓存状态实例的对象池。
+    *   `StateDic`: 状态对象池缓存。
 *   **重要方法**:
     *   `EnterState(UClass* StateClass)`: 按类切换状态。
     *   `EnterState<T>()`: 泛型切换状态入口。
-    *   `StateInvoke(EInputType InputType)`: 按当前状态处理输入派发，决定立即切换、打断后摇或等待缓存窗口消费。
-    *   `StateReInvoke(EInputType InputType)`: 在连击窗口内根据缓存输入执行状态重入或派生切换。
-    *   `ComboUpdate()`: 消费缓存输入，并触发下一段连击或派生状态。
-    *   `LoadState(UClass* StateClass)`: 从对象池获取或创建指定状态实例。
-    *   `ExitCurrentState()`: 退出当前状态。
-    *   `Stop()`: 强制退出当前状态并清空状态对象池。
+    *   `StateInvoke(EInputType InputType)`: 处理输入起手请求。
+    *   `StateReInvoke(EInputType InputType)`: 处理状态重入和连段推进。
+    *   `ComboUpdate()`: 消费缓存并尝试触发下一段连击。
+    *   `Stop()`: 强制停止状态机。
     *   `GetCurrentState()`: 获取当前状态对象。
 
 ### 3.2.10 Player/StateMachine/States
@@ -342,16 +340,16 @@ Source/ACTGame/
 
 **`PlayerStateBase.h / .cpp`**
 *   **继承对象**: `UObject`，并实现 `IState`
-*   **功能**: 所有玩家具体状态的公共基类，统一保存角色和状态机上下文，并提供动作数据、动画实例、输入查询和输入缓存访问接口。
+*   **功能**: 所有玩家具体状态的公共基类，统一保存角色、状态机和输入缓存引用，并提供访问动画实例和动作数据的快捷接口。
 *   **重要变量**:
     *   `Character`: 宿主角色引用。
     *   `StateMachine`: 宿主状态机引用。
-    *   `InputCacheSystem`: 输入缓存组件成员，当前主要保留为兼容字段，实际访问通过控制器动态获取。
+    *   `InputCacheSystem`: 输入缓存系统引用。
 *   **重要方法**:
-    *   `Init(APlayerCharacter* InCharacter, UPlayerStateMachine* InStateMachine, UInputCacheSystem* InInputCacheSystem)`: 初始化角色与状态机依赖。
+    *   `Init(APlayerCharacter* InCharacter, UPlayerStateMachine* InStateMachine, UInputCacheSystem* InInputCacheSystem)`: 初始化状态依赖。
     *   `GetActionData()`: 获取当前状态对应的动作数据。
     *   `GetAnimInstance()`: 获取动画实例。
-    *   `GetInputCacheSystem()`: 通过当前控制器动态获取输入缓存组件。
+    *   `GetInputCacheSystem()`: 获取输入缓存组件。
     *   `IsInputActionTriggered(const UInputAction* Action)`: 查询输入触发状态。
     *   `GetInputActionValue(const UInputAction* Action)`: 查询输入值。
 
@@ -381,12 +379,12 @@ Source/ACTGame/
 
 **`PlayerTurnBackState.h / .cpp`**
 *   **继承对象**: `UPlayerStateBase`
-*   **功能**: 转身过渡状态，进入时设置 `IsTurnBack` 动画标记，并在动画蓝图退出转身后根据当前输入切回待机或移动状态。
+*   **功能**: 独立转身状态，处理大角度急停转身逻辑，并在动画结束后切回 Idle 或 Walk。
 *   **重要变量**: 无。
 *   **重要方法**:
-    *   `EnterState()`: 打开动画实例中的转身标记。
-    *   `UpdateState(float DeltaTime)`: 监听 `IsTurnBack` 状态，并在转身结束后切回 `Idle` 或 `Walk`。
-    *   `ExitState()`: 清理转身、移动和跑步动画标记。
+    *   `EnterState()`
+    *   `UpdateState(float DeltaTime)`
+    *   `ExitState()`
 
 ### 3.2.12 Player/StateMachine/States/Combo/Attack
 
@@ -411,46 +409,46 @@ Source/ACTGame/
 
 **`PlayerAttackState_1.h / .cpp`**
 *   **继承对象**: `UPlayerAttackStateBase`
-*   **功能**: 普攻第一段状态，负责读取当前动作数据中的蒙太奇并完成首段普攻的播放、结束回退与回调绑定。
+*   **功能**: 普攻第一段状态，负责播放第一段攻击动画并在蒙太奇结束后驱动状态流转。
 *   **重要变量**:
-    *   `AttackMontage`: 从 `ActionData` 读取的当前段攻击蒙太奇。
+    *   `AttackMontage`: 当前状态使用的攻击蒙太奇。
 *   **重要方法**:
-    *   `EnterState()`: 读取动作数据、播放蒙太奇并绑定结束回调。
-    *   `UpdateState(float DeltaTime)`: 当前不主动轮询连击，连段推进由动画通知驱动。
-    *   `ExitState()`: 清理回调并重置退出窗口状态。
+    *   `EnterState()`
+    *   `UpdateState(float DeltaTime)`
+    *   `ExitState()`
     *   `OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)`: 处理攻击蒙太奇结束事件。
 
 **`PlayerAttackState_2.h / .cpp`**
 *   **继承对象**: `UPlayerAttackStateBase`
-*   **功能**: 普攻第二段状态，负责第二段普攻蒙太奇的播放、结束回退与回调绑定。
+*   **功能**: 普攻第二段状态，负责第二段攻击蒙太奇播放与结束回调处理。
 *   **重要变量**:
-    *   `AttackMontage`: 从 `ActionData` 读取的当前段攻击蒙太奇。
+    *   `AttackMontage`: 当前状态使用的攻击蒙太奇。
 *   **重要方法**:
-    *   `EnterState()`: 读取动作数据、播放蒙太奇并绑定结束回调。
-    *   `UpdateState(float DeltaTime)`: 当前不主动轮询连击，连段推进由动画通知驱动。
-    *   `ExitState()`: 清理回调并重置退出窗口状态。
+    *   `EnterState()`
+    *   `UpdateState(float DeltaTime)`
+    *   `ExitState()`
     *   `OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)`: 处理攻击蒙太奇结束事件。
 
 **`PlayerAttackState_3.h / .cpp`**
 *   **继承对象**: `UPlayerAttackStateBase`
-*   **功能**: 普攻第三段状态，负责第三段普攻蒙太奇的播放、结束回退与回调绑定。
+*   **功能**: 普攻第三段状态，负责第三段攻击蒙太奇播放与结束回调处理。
 *   **重要变量**:
-    *   `AttackMontage`: 从 `ActionData` 读取的当前段攻击蒙太奇。
+    *   `AttackMontage`: 当前状态使用的攻击蒙太奇。
 *   **重要方法**:
-    *   `EnterState()`: 读取动作数据、播放蒙太奇并绑定结束回调。
-    *   `UpdateState(float DeltaTime)`: 当前不主动轮询连击，连段推进由动画通知驱动。
-    *   `ExitState()`: 清理回调并重置退出窗口状态。
+    *   `EnterState()`
+    *   `UpdateState(float DeltaTime)`
+    *   `ExitState()`
     *   `OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)`: 处理攻击蒙太奇结束事件。
 
 **`PlayerAttackState_4.h / .cpp`**
 *   **继承对象**: `UPlayerAttackStateBase`
-*   **功能**: 普攻第四段状态，负责末段普攻蒙太奇的播放、结束回退与回调绑定。
+*   **功能**: 普攻第四段状态，负责末段攻击蒙太奇播放与结束回调处理。
 *   **重要变量**:
-    *   `AttackMontage`: 从 `ActionData` 读取的当前段攻击蒙太奇。
+    *   `AttackMontage`: 当前状态使用的攻击蒙太奇。
 *   **重要方法**:
-    *   `EnterState()`: 读取动作数据、播放蒙太奇并绑定结束回调。
-    *   `UpdateState(float DeltaTime)`: 当前不主动轮询连击，连段推进由动画通知驱动。
-    *   `ExitState()`: 清理回调并重置退出窗口状态。
+    *   `EnterState()`
+    *   `UpdateState(float DeltaTime)`
+    *   `ExitState()`
     *   `OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)`: 处理攻击蒙太奇结束事件。
 
 ### 3.2.14 Player/StateMachine/States/Combo/Attack/Special
@@ -459,13 +457,13 @@ Source/ACTGame/
 
 **`PlayerSpecialAttackState.h / .cpp`**
 *   **继承对象**: `UPlayerAttackStateBase`
-*   **功能**: 特殊攻击状态，负责读取动作数据中的特殊技蒙太奇，并完成播放、结束回退与回调绑定；可由待机、移动或攻击退出窗口切入。
+*   **功能**: 特殊攻击状态，负责播放特殊攻击动画并在结束后完成状态切换。
 *   **重要变量**:
-    *   `AttackMontage`: 从 `ActionData` 读取的特殊攻击蒙太奇。
+    *   `AttackMontage`: 特殊攻击使用的蒙太奇。
 *   **重要方法**:
-    *   `EnterState()`: 读取动作数据、播放蒙太奇并绑定结束回调。
-    *   `UpdateState(float DeltaTime)`: 维持当前特殊攻击状态。
-    *   `ExitState()`: 清理回调并重置退出窗口状态。
+    *   `EnterState()`
+    *   `UpdateState(float DeltaTime)`
+    *   `ExitState()`
     *   `OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)`: 处理特殊攻击动画结束事件。
 
 ### 3.2.15 Player/StateMachine/States/Combo/Evade
@@ -474,16 +472,16 @@ Source/ACTGame/
 
 **`PlayerEvadeState.h / .cpp`**
 *   **继承对象**: `UPlayerAttackStateBase`
-*   **功能**: 玩家闪避状态，负责根据是否存在方向输入选择前闪或后闪蒙太奇，必要时让角色在闪避期间平滑转向，并在异常情况下执行容错回退。
+*   **功能**: 玩家闪避状态，负责根据输入方向播放前闪或后闪动画，并在需要时让角色平滑跟随输入方向旋转。
 *   **重要变量**:
     *   `AM_Evade_Front`: 前闪蒙太奇。
     *   `AM_Evade_Back`: 后闪蒙太奇。
     *   `CharacterRotateSpeed`: 闪避期间角色旋转速度。
     *   `bShouldRotate`: 是否需要跟随输入平滑转向。
 *   **重要方法**:
-    *   `EnterState()`: 读取闪避动作数据，重置移动动画标记并决定播放前闪或后闪蒙太奇。
-    *   `UpdateState(float DeltaTime)`: 在需要时按目标朝向平滑旋转角色。
-    *   `ExitState()`: 清理闪避结束委托。
+    *   `EnterState()`
+    *   `UpdateState(float DeltaTime)`
+    *   `ExitState()`
     *   `OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)`: 处理闪避动画结束事件。
 
 ### 3.2.16 Player/Animation
@@ -666,7 +664,7 @@ sequenceDiagram
     Player->>Ctrl: 点击攻击键
     Ctrl->>Cache: AddCache()
     Ctrl->>SM: StateInvoke()
-    SM->>Cache: ClearCache()
+    SM->>Cache: GetCache() [成功]
     SM->>Atk1: EnterState()
     Atk1->>Atk1: 播放第一段动画
 
