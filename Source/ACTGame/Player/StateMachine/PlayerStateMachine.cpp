@@ -1,4 +1,4 @@
-﻿#include "PlayerStateMachine.h"
+#include "PlayerStateMachine.h"
 #include "Player/Data/Action/ActionData.h"
 #include "Player/Character/PlayerCharacter.h"
 #include "Player/Character/ACTPlayerController.h"
